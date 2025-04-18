@@ -1,0 +1,43 @@
+name: GitHub Action
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+      ROS_DISTRO: humble
+      ROS_PYTHON_VERSION: 3
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: humble
+      - run: |
+          sudo apt update
+          source /opt/ros/humble/setup.bash
+          rosdep update
+          rosdep install --from-paths . --ignore-src -y
+      - run: |
+          source /opt/ros/humble/setup.bash
+          colcon build --event-handlers console_cohesion+ --packages-select ros2_kinematics_kdl
+          source install/setup.bash
+          colcon test --event-handlers console_cohesion+ --packages-select ros2_kinematics_kdl
+      - run: |
+          echo "::group::ROS 2 Test Logs"
+          if find log/latest_test/ros2_kinematics_kdl/ -name '*.log' | grep -q .; then
+            for logfile in $(find log/latest_test/ros2_kinematics_kdl/ -name '*.log'); do
+              echo "📄 BEGIN LOG: $logfile"
+              echo "-----------------------------------"
+              cat "$logfile"
+              echo "-----------------------------------"
+              echo ""
+            done
+          else
+            echo "No test logs found!"
+          fi
+          echo "::endgroup::"
+          colcon test-result --verbose
+        if: always()
