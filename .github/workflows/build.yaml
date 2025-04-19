@@ -24,7 +24,7 @@ jobs:
           source /opt/ros/humble/setup.bash
           colcon build --event-handlers console_cohesion+ --packages-select ros2_kinematics_kdl
           source install/setup.bash
-          colcon test --event-handlers console_cohesion+ --packages-select ros2_kinematics_kdl
+          colcon test --event-handlers console_cohesion+ --packages-select ros2_kinematics_kdl --pytest-args -s -v
       - run: |
           echo "::group::ROS 2 Test Logs"
           if find log/latest_test/ros2_kinematics_kdl/ -name '*.log' | grep -q .; then
