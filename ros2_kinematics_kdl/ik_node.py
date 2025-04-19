@@ -45,6 +45,7 @@ class KDLInverseKinematicsNode(Node):
             raise RuntimeError("Could not create KDL tree.")
 
         self.chain = tree.getChain(base_link, ee_link)
+        self.get_logger().info(f"KDL chain has {self.chain.getNrOfJoints()} joints")
         self.joint_names = [
             joint.name for joint in urdf_model.joints if joint.type != "fixed"
         ][: self.chain.getNrOfJoints()]
